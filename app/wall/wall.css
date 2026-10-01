@@ -1,0 +1,198 @@
+/* River wall styles — SUNNY LIGHT theme.
+   Every selector is scoped under .wall-shell so nothing leaks into beaver's
+   global Tailwind layer. The wall-shell is fixed to the viewport so the wall
+   fills the screen without touching <body>. */
+
+.wall-shell {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #8fc7f5; /* river tone — continuous water, no light margins */
+  color: #16313f;
+  color-scheme: light;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* column: beaver nav on top (fixed height), the wall fills the rest */
+  display: flex;
+  flex-direction: column;
+}
+.wall-shell * { box-sizing: border-box; }
+
+/* The top nav + reskinned overlay chrome (filter card / pill / help "?") reuse
+   beaver's design system → reset the shell's monospace font back to beaver's
+   Poppins for these subtrees only. (The in-world wood controls keep monospace.) */
+.wall-shell .wall-nav,
+.wall-shell .wall-chrome { font-family: var(--font-poppins), system-ui, sans-serif; }
+
+/* ── the Pixi wall + HTML overlays ─────────────────────────────────────── */
+/* flex:1 + min-height:0 lets the wall take all space under the nav and lets the
+   Pixi canvas (absolutely positioned inside) size to it via the ResizeObserver. */
+.wall-shell .wall { position: relative; flex: 1; min-height: 0; width: 100%; }
+.wall-shell .wall-canvas { position: absolute; inset: 0; }
+.wall-shell .wall-canvas canvas { display: block; }
+
+/* The wall is the keyboard surface; show a clear focus outline. */
+.wall-shell .wall:focus { outline: none; }
+.wall-shell .wall:focus-visible { outline: 2px solid #f08c00; outline-offset: -2px; }
+
+/* ── Hover detail — ONE LINE on the signboard (replaces the search field while
+   hovering a unit). Reads like the recessed wood-box title; an inline action
+   button sits at the end for the unit's next step. ───────────────────────── */
+.wall-shell .cb-hover {
+  display: flex; align-items: center; gap: 8px; max-width: 480px;
+}
+.wall-shell .cb-hover-line {
+  font-family: inherit; font-size: 12px; font-weight: 700; color: #f3ead6;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 1px rgba(42, 29, 16, 0.6);
+}
+/* inline "do the next thing" button — batch → management page; paper → its stage action */
+.wall-shell .cb-hover-act {
+  flex-shrink: 0; cursor: pointer; font-family: inherit; font-size: 11px; font-weight: 700;
+  color: #2a1d10; background: #f0a830; border: 1px solid #f08c00; border-radius: 5px;
+  padding: 3px 9px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.wall-shell .cb-hover-act:hover { background: #f3b850; }
+
+/* ── bottom bar: the wood plank-SIGN (control box) with the filter + "?" to its
+   right. A single centered flex row pins everything to the bottom; flex `order`
+   lays it out control-box → filter → help, regardless of source order.
+   The Filter card / pill / "?" are now beaver Tailwind components (in RiverWall.tsx),
+   so their styling lives in the JSX, not here. */
+.wall-shell .bottombar {
+  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+  display: flex; align-items: flex-end; justify-content: center; flex-wrap: nowrap;
+  gap: 10px; max-width: 96vw; pointer-events: none;
+}
+.wall-shell .bottombar > * { pointer-events: auto; }
+
+/* right-of-signboard side stack: Filter pill on top, "?" under it */
+.wall-shell .bb-side {
+  order: 2; align-self: flex-end;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+}
+
+/* ── The "{n} on the river" plank-SIGN (granularity control box) ─────────────
+   This is the cartoon plank-sign look Fahad iterated on — a board of stacked
+   horizontal planks (alternating tone + a light top-edge highlight) framed by two
+   vertical POSTS that extend above & below, each studded with screws down its
+   length. Reproduces drawDamStructure's plaque in CSS. Title/search on top, the
+   count-buttons row underneath with ± at the right end. */
+.wall-shell .controlbar {
+  order: 1;
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  width: max-content; max-width: 44vw;
+  padding: 9px 24px; /* generous side padding so content clears the flanking posts */
+  /* board = stacked horizontal planks (3 alternating tones, thin dark seams) +
+     a light highlight plank along the very top. */
+  background:
+    linear-gradient(#c9a063 0, #b98a52 2px, rgba(185, 138, 82, 0) 3px),
+    repeating-linear-gradient(
+      to bottom,
+      #a3743f 0, #a3743f 8.5px, #5b4126 8.5px, #5b4126 9px,
+      #946537 9px, #946537 17.5px, #5b4126 17.5px, #5b4126 18px,
+      #b0824c 18px, #b0824c 26.5px, #5b4126 26.5px, #5b4126 27px
+    ),
+    #9a6e3f;
+  border: 2px solid #3f2c19; border-radius: 8px;
+  box-shadow: 0 3px 14px rgba(20, 49, 63, 0.30), inset 0 1px 0 rgba(201, 160, 99, 0.45);
+}
+/* the two support POSTS — dark wood bars flanking the sign, extending past its top
+   & bottom edges, with a screw stud repeated every plank-pitch down each post. */
+.wall-shell .controlbar::before,
+.wall-shell .controlbar::after {
+  content: ""; position: absolute; top: -6px; bottom: -6px; width: 13px;
+  background-color: #6e4a26;
+  background-image: radial-gradient(
+    circle at 50% 8px,
+    #d8b478 0, #d8b478 0.9px, #2a1d10 1.1px, #2a1d10 2px, rgba(0, 0, 0, 0) 2.2px
+  );
+  background-size: 100% 16px; background-repeat: repeat-y;
+  border: 1.5px solid #3f2c19; border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(201, 160, 99, 0.3);
+}
+.wall-shell .controlbar::before { left: -5px; }
+.wall-shell .controlbar::after { right: -5px; }
+/* search box that reads like the wood-box title (recessed plank look) */
+.wall-shell .cb-search {
+  font-family: inherit; font-size: 12px; font-weight: 700; text-align: center;
+  color: #f3ead6; background: rgba(42, 29, 16, 0.35);
+  border: 1px solid #5b4126; border-radius: 5px; padding: 3px 10px; width: 240px;
+  outline: none; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.wall-shell .cb-search::placeholder { color: #e7dac0; opacity: 0.75; font-weight: 700; }
+.wall-shell .cb-search:focus { border-color: #f0a830; background: rgba(42, 29, 16, 0.5); }
+.wall-shell .cb-title {
+  color: #f3ead6; font-size: 12px; font-weight: 700; letter-spacing: 0.2px;
+  white-space: nowrap; text-align: center;
+  text-shadow: 0 1px 1px rgba(42, 29, 16, 0.6);
+}
+.wall-shell .cb-buttons { display: flex; align-items: stretch; gap: 4px; }
+/* inset darker-wood plank buttons */
+.wall-shell .cb-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  font-family: inherit; cursor: pointer; min-width: 42px;
+  color: #f3ead6; background: #7a5532;
+  border: 1px solid #3f2c19; border-radius: 5px; padding: 3px 5px;
+  box-shadow: inset 0 1px 0 rgba(201, 160, 99, 0.35);
+}
+.wall-shell .cb-btn:hover { border-color: #c79a5c; background: #8a6038; }
+.wall-shell .cb-btn.sel {
+  color: #2a1d10; background: #f0a830; border-color: #f08c00; font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.wall-shell .cb-n { font-size: 13px; font-weight: 700; line-height: 1.1; }
+.wall-shell .cb-l { font-size: 9px; opacity: 0.9; line-height: 1.1; }
+.wall-shell .cb-zoom { display: flex; flex-direction: column; gap: 3px; margin-left: 6px; }
+.wall-shell .cb-zbtn {
+  width: 28px; height: auto; font-size: 16px; line-height: 1; padding: 2px 0;
+  color: #f3ead6; background: #7a5532;
+  border: 1px solid #3f2c19; border-radius: 5px; cursor: pointer; font-family: inherit;
+  box-shadow: inset 0 1px 0 rgba(201, 160, 99, 0.35);
+}
+.wall-shell .cb-zbtn:hover { border-color: #c79a5c; background: #8a6038; }
+
+/* ── Help dialog + corner "?" ───────────────────────────────────────────── */
+.wall-shell .help-backdrop {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(20, 49, 63, 0.28); z-index: 20; pointer-events: auto;
+}
+.wall-shell .help-modal {
+  width: min(560px, 90vw);
+  background: #fffdf8; border: 1px solid #c7b48f; border-radius: 12px;
+  padding: 22px 26px; color: #16313f;
+  box-shadow: 0 12px 40px rgba(20, 49, 63, 0.3);
+}
+.wall-shell .help-modal h2 { margin: 0 0 10px; color: #1f5e8c; font-size: 20px; }
+.wall-shell .help-modal p { margin: 0 0 12px; color: #4c6b80; font-size: 13px; line-height: 1.5; }
+.wall-shell .help-legend { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.wall-shell .help-legend-label {
+  font-weight: 700; color: #1f5e8c; font-size: 12px; text-align: right;
+  line-height: 1.2; white-space: nowrap; flex-shrink: 0;
+}
+.wall-shell .help-keys { flex: 1; list-style: none; margin: 0; padding: 0; font-size: 13px; color: #274a5e; }
+.wall-shell .help-key { flex: 1; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.wall-shell .hk-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #274a5e; }
+.wall-shell .hk-swatch { width: 12px; height: 12px; border-radius: 2px; border: 1px solid rgba(20, 49, 63, 0.25); display: inline-block; }
+.wall-shell .help-keys li {
+  display: flex; justify-content: space-between; gap: 16px; margin: 6px 0;
+}
+.wall-shell .help-keys li span { display: inline-flex; align-items: center; gap: 2px; }
+.wall-shell .help-keys kbd {
+  display: inline-block; min-width: 16px; text-align: center;
+  background: #eef5fc; border: 1px solid #c7d8e8; border-radius: 4px;
+  padding: 0 5px; margin-right: 3px; font-size: 11px; color: #16313f;
+}
+.wall-shell .help-ok {
+  font-family: inherit; cursor: pointer; font-size: 14px; font-weight: 700;
+  color: #2a1d10; background: #f0a830; border: 1px solid #f08c00; border-radius: 8px;
+  padding: 8px 20px;
+}
+.wall-shell .help-ok:hover { background: #f3b850; }
+/* (the "?" help fab is now a beaver Tailwind button in RiverWall.tsx) */
+
+/* Visually hidden but available to screen readers + assistive tech. */
+.wall-shell .sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}

@@ -1,0 +1,14 @@
+{
+  "codeConnect": {
+    "parser": "react",
+    "include": [
+      "figma/**/*.figma.tsx",
+      "src/components/ui/**/*.tsx"
+    ],
+    "exclude": ["node_modules/**", "dist/**"],
+    "label": "Student Design System",
+    "importPaths": {
+      "src/components/ui/*": "@student-ds/ui"
+    }
+  }
+}
